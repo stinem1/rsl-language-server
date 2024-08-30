@@ -17,14 +17,15 @@ import           Raise.DiagnosticParser      (parseRSLTC)
 import           System.Directory            (withCurrentDirectory)
 import           System.FilePath             (takeDirectory, takeFileName)
 import           System.Info                 (os)
-import           System.Process              (readProcessWithExitCode)
+import           System.Process              (readCreateProcessWithExitCode, shell)
 
 runTool :: String -> [String] -> FilePath -> IO T.Text
 runTool tool args path = do
   let dir = takeDirectory path
       file = "./" ++ takeFileName path
+      command = mconcat [tool, " ", unwords (args ++ [file])]
   withCurrentDirectory dir $ do
-    (_, stdout, _) <- readProcessWithExitCode tool (args ++ [file]) ""
+    (_, stdout, _) <- readCreateProcessWithExitCode (shell command) ""
     pure $ T.pack stdout
 
 rsltcPath :: FilePath
